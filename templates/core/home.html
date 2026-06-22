@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio | Gestión de incidencias{% endblock %}
+
+{% block content %}
+<div class="page-hero rounded-4 p-4 p-md-5 mb-4 shadow-sm">
+  <div class="row g-4 align-items-center">
+    <div class="col-lg-7">
+      <div class="text-uppercase small fw-semibold opacity-75 mb-2">Dashboard de incidencias</div>
+      <h1 class="display-6 fw-semibold mb-3">Gestión de incidencias</h1>
+      <p class="lead mb-3">
+        Control operativo de devoluciones, pedidos y transporte con trazabilidad por representante.
+      </p>
+      {% if representative %}
+        <div class="d-inline-flex align-items-center gap-2 bg-white bg-opacity-10 rounded-pill px-3 py-2">
+          <span class="opacity-75">Representante</span>
+          <strong>{{ representative.code }} - {{ representative.name }}</strong>
+        </div>
+      {% else %}
+        <div class="d-inline-flex align-items-center gap-2 bg-white bg-opacity-10 rounded-pill px-3 py-2">
+          <span>Acceso global o privilegiado</span>
+        </div>
+      {% endif %}
+    </div>
+    <div class="col-lg-5">
+      <div class="row g-3">
+        <div class="col-4">
+          <div class="metric-card p-3 text-center text-dark">
+            <div class="text-secondary small">Devoluciones</div>
+            <div class="metric-value">{{ my_incidents_count }}</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="metric-card p-3 text-center text-dark">
+            <div class="text-secondary small">Pedidos</div>
+            <div class="metric-value">{{ order_incidents_count }}</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="metric-card p-3 text-center text-dark">
+            <div class="text-secondary small">Transporte</div>
+            <div class="metric-value">{{ transport_incidents_count }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3">
+  <div>
+    <div class="section-title">Módulos</div>
+    <h2 class="h4 mb-0">Accesos rápidos</h2>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-4">
+    <div class="surface-card module-card p-4 h-100">
+      <div class="module-kicker mb-3">Devoluciones</div>
+      <h3 class="h5">Mercancía devuelta</h3>
+      <p class="text-secondary">Busca un albarán, selecciona líneas y registra cantidades de devolución.</p>
+      <div class="display-6 fw-semibold mb-3">{{ my_incidents_count }}</div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-primary" href="{% url 'devoluciones-index' %}">Nueva devolución</a>
+        <a class="btn btn-outline-secondary" href="{% url 'my-return-incidents' %}">Listado</a>
+        <a class="btn btn-outline-secondary" href="{% url 'return-incident-export' 'xlsx' %}">Excel</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="surface-card module-card p-4 h-100">
+      <div class="module-kicker mb-3">Pedidos</div>
+      <h3 class="h5">Novedades de pedido</h3>
+      <p class="text-secondary">Asocia albaranes, selecciona líneas y documenta notas específicas.</p>
+      <div class="display-6 fw-semibold mb-3">{{ order_incidents_count }}</div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-primary" href="{% url 'pedidos-index' %}">Nueva incidencia</a>
+        <a class="btn btn-outline-secondary" href="{% url 'order-incidents' %}">Listado</a>
+        <a class="btn btn-outline-secondary" href="{% url 'order-incident-export' 'xlsx' %}">Excel</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="surface-card module-card p-4 h-100">
+      <div class="module-kicker mb-3">Transporte</div>
+      <h3 class="h5">Logística y entregas</h3>
+      <p class="text-secondary">Registra incidencias con o sin albarán y controla transportistas.</p>
+      <div class="display-6 fw-semibold mb-3">{{ transport_incidents_count }}</div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-primary" href="{% url 'transport-incident-create' %}">Nueva incidencia</a>
+        <a class="btn btn-outline-secondary" href="{% url 'transport-incidents' %}">Listado</a>
+        <a class="btn btn-outline-secondary" href="{% url 'transport-incident-export' 'xlsx' %}">Excel</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

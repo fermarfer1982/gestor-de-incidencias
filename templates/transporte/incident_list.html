@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load date_format %}
+
+{% block title %}Incidencias de transporte | Incidencias{% endblock %}
+
+{% block content %}
+<div class="surface-card p-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+    <div>
+      <div class="section-title">Incidencias de transporte</div>
+      <h1 class="h3 mb-1">Incidencias de transporte</h1>
+      <p class="mb-0 text-secondary">Se muestran las incidencias dentro de tu alcance de representantes.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-secondary" href="{% url 'transport-incident-export' 'csv' %}?{{ request.GET.urlencode }}">Exportar CSV</a>
+      <a class="btn btn-outline-secondary" href="{% url 'transport-incident-export' 'xlsx' %}?{{ request.GET.urlencode }}">Exportar Excel</a>
+      <a class="btn btn-primary" href="{% url 'transport-incident-create' %}">Nueva incidencia</a>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <a class="filter-chip {% if not selected_status %}fw-semibold{% endif %}" href="{% url 'transport-incidents' %}">Todos</a>
+    <a class="filter-chip" href="{% url 'transport-incidents' %}?status=pending"><span class="badge text-bg-primary">Abierta</span></a>
+    <a class="filter-chip" href="{% url 'transport-incidents' %}?status=in_progress"><span class="badge text-bg-warning">En trámite</span></a>
+    <a class="filter-chip" href="{% url 'transport-incidents' %}?status=closed"><span class="badge text-bg-success">Cerrada</span></a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-clean align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Fecha</th>
+          <th>Transportista</th>
+          <th>Tipo</th>
+          <th>Representante</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for incident in incidents %}
+          <tr>
+            <td><strong>{{ incident.incident_number }}</strong></td>
+            <td>{{ incident.created_at|spanish_date }}</td>
+            <td>{{ incident.get_carrier_display }}</td>
+            <td>{{ incident.get_incident_type_display }}</td>
+            <td>{{ incident.representative_code|default:"-" }}</td>
+            <td>
+              <span class="badge {% if incident.status == 'closed' %}text-bg-success{% elif incident.status == 'in_progress' %}text-bg-warning{% else %}text-bg-primary{% endif %}">
+                {{ incident.get_status_display }}
+              </span>
+            </td>
+            <td><a href="{% url 'transport-incident-detail' incident.pk %}" class="btn btn-sm btn-outline-secondary">Ver detalle</a></td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-secondary py-4">Todavía no hay incidencias de transporte.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

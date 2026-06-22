@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Buscar albarán | Incidencias de devoluciones{% endblock %}
+
+{% block content %}
+<div class="surface-card p-4">
+  <div class="module-kicker mb-3">Devoluciones</div>
+  <h1 class="h3">Buscar albarán</h1>
+  {% if representative %}
+    <p class="text-secondary mb-4">
+      Representante activo: <strong>{{ representative.code }}</strong> - {{ representative.name }}
+    </p>
+  {% else %}
+    <p class="text-secondary mb-4">
+      Acceso global: puedes buscar por albarán directamente o filtrar por representante.
+    </p>
+  {% endif %}
+
+  <form method="post" class="row g-3 mt-2">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% if can_choose_representative %}
+      <div class="col-md-6">
+        {{ form.representative_code.label_tag }}
+        {{ form.representative_code }}
+        {% for error in form.representative_code.errors %}
+          <div class="text-danger small mt-1">{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div class="col-md-6">
+      {{ form.delivery_note_number.label_tag }}
+      {{ form.delivery_note_number }}
+      {% for error in form.delivery_note_number.errors %}
+        <div class="text-danger small mt-1">{{ error }}</div>
+      {% endfor %}
+    </div>
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">Buscar albarán</button>
+      <a class="btn btn-outline-secondary" href="{% url 'my-return-incidents' %}">Ver listado</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

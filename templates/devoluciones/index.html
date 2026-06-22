@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load date_format %}
+
+{% block title %}Incidencias de devoluciones | Gestión de incidencias{% endblock %}
+
+{% block content %}
+<div class="bg-white border rounded-3 p-4 shadow-sm">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div>
+      <h1 class="h3">Búsqueda de albarán</h1>
+      <p class="mb-0 text-secondary">
+        Representante activo: <strong>{{ representative.code }}</strong> - {{ representative.name }}
+      </p>
+    </div>
+  </div>
+
+  <form method="post" class="row g-3 mt-2">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="col-md-6">
+      {{ form.delivery_note_number.label_tag }}
+      {{ form.delivery_note_number }}
+      {% for error in form.delivery_note_number.errors %}
+        <div class="text-danger small mt-1">{{ error }}</div>
+      {% endfor %}
+    </div>
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">Buscar albarán</button>
+    </div>
+  </form>
+</div>
+
+{% if delivery_note %}
+  <div class="bg-white border rounded-3 p-4 shadow-sm mt-4">
+    <h2 class="h4">Cabecera</h2>
+    <div class="row g-3">
+      <div class="col-md-3">
+        <div class="text-secondary small">Albarán</div>
+        <div>{{ delivery_note.header.delivery_note_number }}</div>
+      </div>
+      <div class="col-md-3">
+        <div class="text-secondary small">Fecha</div>
+        <div>{{ delivery_note.header.delivery_note_date|spanish_date }}</div>
+      </div>
+      <div class="col-md-6">
+        <div class="text-secondary small">Cliente</div>
+        <div>{{ delivery_note.header.customer_name }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border rounded-3 p-4 shadow-sm mt-4">
+    <h2 class="h4">Líneas</h2>
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead>
+          <tr>
+            <th>Línea</th>
+            <th>Artículo</th>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th>Lote de venta</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for line in delivery_note.lines %}
+            <tr>
+              <td>{{ line.delivery_note_line }}</td>
+              <td>{{ line.article_code }}</td>
+              <td>{{ line.article_description }}</td>
+              <td>{{ line.quantity }}</td>
+              <td>{{ line.sale_lot|default:"-" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

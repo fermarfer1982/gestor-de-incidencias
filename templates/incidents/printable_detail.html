@@ -1,0 +1,170 @@
+{% load date_format %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+  <style>
+    :root {
+      color: #172033;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+    }
+    body {
+      margin: 0;
+      background: #f5f7fb;
+    }
+    .page {
+      max-width: 960px;
+      margin: 24px auto;
+      padding: 32px;
+      background: #fff;
+      border: 1px solid #d9e0ec;
+    }
+    .print-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin: 16px auto 0;
+      max-width: 960px;
+    }
+    .btn {
+      border: 1px solid #adb8c8;
+      border-radius: 6px;
+      color: #172033;
+      display: inline-block;
+      padding: 8px 12px;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #fff;
+    }
+    h1 {
+      font-size: 24px;
+      margin: 0 0 6px;
+    }
+    h2 {
+      border-bottom: 1px solid #d9e0ec;
+      font-size: 16px;
+      margin: 26px 0 12px;
+      padding-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .muted {
+      color: #637083;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 24px;
+    }
+    .label {
+      color: #637083;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .value {
+      margin-top: 2px;
+      white-space: pre-wrap;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th,
+    td {
+      border-bottom: 1px solid #e4e9f2;
+      padding: 7px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #eef3fb;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    @media print {
+      body {
+        background: #fff;
+      }
+      .page {
+        border: 0;
+        margin: 0;
+        max-width: none;
+        padding: 0;
+      }
+      .print-actions {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-actions">
+    <a class="btn" href="{{ detail_url }}">Volver al detalle</a>
+    <button class="btn btn-primary" type="button" onclick="window.print()">Imprimir</button>
+  </div>
+  <main class="page">
+    <header>
+      <h1>{{ title }}</h1>
+      <div class="muted">{{ subtitle }}</div>
+    </header>
+
+    {% for section in sections %}
+      <section>
+        <h2>{{ section.title }}</h2>
+        <div class="grid">
+          {% for label, value in section.rows %}
+            <div>
+              <div class="label">{{ label }}</div>
+              <div class="value">{{ value|default:"-"|linebreaksbr }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endfor %}
+
+    {% for table in tables %}
+      <section>
+        <h2>{{ table.title }}</h2>
+        <table>
+          <thead>
+            <tr>
+              {% for header in table.headers %}
+                <th>{{ header }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table.rows %}
+              <tr>
+                {% for value in row %}
+                  <td>{{ value|default:"-" }}</td>
+                {% endfor %}
+              </tr>
+            {% empty %}
+              <tr><td colspan="{{ table.headers|length }}">Sin datos.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    {% endfor %}
+
+    <section>
+      <h2>Adjuntos</h2>
+      {% if attachments %}
+        <ul>
+          {% for attachment in attachments %}
+            <li>{{ attachment }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">No hay adjuntos.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

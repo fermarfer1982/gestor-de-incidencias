@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load date_format %}
+
+{% block title %}Crear incidencia | Incidencias de devoluciones{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="surface-card p-4">
+      <div class="module-kicker mb-3">Devoluciones</div>
+      <h1 class="h3">Crear incidencia</h1>
+      <form method="post" enctype="multipart/form-data" class="mt-3">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="mb-3">
+          {{ form.destination.label_tag }}
+          {{ form.destination }}
+          {% for error in form.destination.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+        <div class="mb-3">
+          {{ form.observations.label_tag }}
+          {{ form.observations }}
+          {% for error in form.observations.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+        <div class="mb-3">
+          {{ form.attachments.label_tag }}
+          {{ form.attachments }}
+          {% for error in form.attachments.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-secondary" href="{% url 'delivery-note-result' %}">Volver a líneas</a>
+          <button type="submit" class="btn btn-primary">Crear incidencia</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="surface-card p-4 mb-4">
+      <h2 class="h5">Cabecera del albarán</h2>
+      <div class="row g-3">
+        <div class="col-6"><div class="detail-label">Albarán</div><div class="detail-value">{{ delivery_note.header.delivery_note_number }}</div></div>
+        <div class="col-6"><div class="detail-label">Fecha</div><div class="detail-value">{{ delivery_note.header.delivery_note_date|spanish_date }}</div></div>
+        <div class="col-12"><div class="detail-label">Cliente</div><div class="detail-value">{{ delivery_note.header.customer_name }}</div></div>
+        <div class="col-12"><div class="detail-label">Enviado a</div><div class="detail-value">{{ delivery_note.header.customer_fiscal_address|default:"-" }}</div></div>
+        <div class="col-12"><div class="detail-label">Representante</div><div class="detail-value">{{ representative.code }} - {{ representative.name }}</div></div>
+      </div>
+    </div>
+    <div class="surface-card p-4">
+      <h2 class="h5">Líneas seleccionadas</h2>
+      <div class="table-responsive">
+        <table class="table table-sm table-clean align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Línea</th>
+              <th>Artículo</th>
+              <th>Cantidad incidencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for line in selected_lines %}
+              <tr>
+                <td>{{ line.delivery_note_line }}</td>
+                <td>{{ line.article_code }}</td>
+                <td>{{ line.quantity_incident }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

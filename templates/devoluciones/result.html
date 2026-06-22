@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load date_format %}
+
+{% block title %}Resultado del albarán | Incidencias de devoluciones{% endblock %}
+
+{% block content %}
+<div class="surface-card p-4 mb-4">
+  <div class="module-kicker mb-3">Devoluciones</div>
+  <h1 class="h3">Resultado con cabecera y líneas</h1>
+  <div class="row g-3 mt-1">
+    <div class="col-md-3">
+      <div class="text-secondary small">Albarán</div>
+      <div>{{ delivery_note.header.delivery_note_number }}</div>
+    </div>
+    <div class="col-md-3">
+      <div class="text-secondary small">Fecha</div>
+      <div>{{ delivery_note.header.delivery_note_date|spanish_date }}</div>
+    </div>
+    <div class="col-md-6">
+      <div class="text-secondary small">Cliente</div>
+      <div>{{ delivery_note.header.customer_name }}</div>
+    </div>
+    <div class="col-md-6">
+      <div class="text-secondary small">Enviado a</div>
+      <div>{{ delivery_note.header.customer_fiscal_address|default:"-" }}</div>
+    </div>
+  </div>
+</div>
+
+<form method="post" class="surface-card p-4">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+    <h2 class="h4 mb-0">Selección múltiple de líneas</h2>
+    <div class="border rounded-3 bg-light px-3 py-2">
+      <div class="small text-secondary">Resumen de selección</div>
+      <div><strong>Líneas:</strong> <span id="selected-lines-count">0</span></div>
+      <div><strong>Cantidad total:</strong> <span id="selected-quantity-total">0.00</span></div>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-clean align-middle" id="delivery-note-lines-table">
+      <thead>
+        <tr>
+          <th>Sel</th>
+          <th>Línea</th>
+          <th>Artículo</th>
+          <th>Descripción</th>
+          <th>Cantidad</th>
+          <th>UM</th>
+          <th>Lote de venta</th>
+          <th>Envase</th>
+          <th>Cantidad incidencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in line_rows %}
+          <tr>
+            <td>{{ row.checkbox.tag }}</td>
+            <td>{{ row.line.delivery_note_line }}</td>
+            <td>{{ row.line.article_code }}</td>
+            <td>{{ row.line.article_description }}</td>
+            <td>{{ row.line.quantity|floatformat:0|intcomma }}</td>
+            <td>{{ row.line.unit_of_measure|default:"-" }}</td>
+            <td>{{ row.line.sale_lot|default:"-" }}</td>
+            <td>{{ row.line.packaging|default:"-" }}</td>
+            <td>{{ row.quantity_field }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% for field in form %}
+    {% if field.name != "selected_lines" and field.errors %}
+      {% for error in field.errors %}
+        <div class="text-danger small">{{ error }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+
+  <div class="d-flex gap-2 mt-3">
+    <a class="btn btn-outline-secondary" href="{% url 'devoluciones-index' %}">Nueva búsqueda</a>
+    <button type="submit" class="btn btn-primary">Continuar</button>
+  </div>
+</form>
+
+<script>
+  (function () {
+    const table = document.getElementById("delivery-note-lines-table");
+    if (!table) {
+      return;
+    }
+
+    const countTarget = document.getElementById("selected-lines-count");
+    const totalTarget = document.getElementById("selected-quantity-total");
+
+    function updateSelectionSummary() {
+      let selectedCount = 0;
+      let selectedTotal = 0;
+
+      table.querySelectorAll("tbody tr").forEach((row) => {
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        const quantityInput = row.querySelector('input[type="number"]');
+        if (!checkbox || !quantityInput || !checkbox.checked) {
+          return;
+        }
+
+        selectedCount += 1;
+        selectedTotal += Number.parseFloat(quantityInput.value || "0") || 0;
+      });
+
+      countTarget.textContent = String(selectedCount);
+      totalTarget.textContent = selectedTotal.toFixed(2);
+    }
+
+    table.addEventListener("input", updateSelectionSummary);
+    table.addEventListener("change", updateSelectionSummary);
+    updateSelectionSummary();
+  })();
+</script>
+{% endblock %}

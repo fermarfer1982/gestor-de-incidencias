@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load date_format %}
+
+{% block title %}Detalle de incidencia | Incidencias de transporte{% endblock %}
+
+{% block content %}
+<div class="surface-card p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div>
+      <h1 class="h3 mb-1">Detalle de incidencia de transporte</h1>
+      <div class="text-secondary">{{ incident.incident_number }}</div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-secondary" href="{% url 'transport-incident-print' incident.pk %}">Imprimir</a>
+      <a class="btn btn-outline-secondary" href="{% url 'transport-incident-pdf' incident.pk %}">Exportar PDF</a>
+      <a class="btn btn-outline-secondary" href="{% url 'transport-incidents' %}">Listado</a>
+      <a class="btn btn-primary" href="{% url 'transport-incident-create' %}">Nueva incidencia</a>
+    </div>
+  </div>
+  <div class="section-title mt-4 mb-2">Datos generales</div>
+  <div class="row g-3">
+    <div class="col-md-3">
+      <strong>Estado:</strong>
+      <span class="badge {% if incident.status == 'closed' %}text-bg-success{% elif incident.status == 'in_progress' %}text-bg-warning{% else %}text-bg-primary{% endif %}">
+        {{ incident.get_status_display }}
+      </span>
+    </div>
+    <div class="col-md-3"><div class="detail-label">Fecha</div><div class="detail-value">{{ incident.created_at|spanish_date }}</div></div>
+    <div class="col-md-3"><div class="detail-label">Transportista</div><div class="detail-value">{{ incident.get_carrier_display }}</div></div>
+    <div class="col-md-3"><div class="detail-label">Tipo</div><div class="detail-value">{{ incident.get_incident_type_display }}</div></div>
+    <div class="col-md-3"><div class="detail-label">Envío/Recogida</div><div class="detail-value">{{ incident.get_shipment_direction_display }}</div></div>
+    <div class="col-md-3"><div class="detail-label">Seguimiento</div><div class="detail-value">{{ incident.tracking_number }}</div></div>
+    <div class="col-md-3"><div class="detail-label">Referencia</div><div class="detail-value">{{ incident.internal_reference }}</div></div>
+    <div class="col-md-3"><div class="detail-label">País</div><div class="detail-value">{{ incident.country }}</div></div>
+    <div class="col-md-3"><div class="detail-label">Provincia</div><div class="detail-value">{{ incident.province }}</div></div>
+    <div class="col-md-3"><div class="detail-label">Municipio</div><div class="detail-value">{{ incident.municipality }}</div></div>
+    <div class="col-md-3"><div class="detail-label">Fecha envío</div><div class="detail-value">{{ incident.shipping_date|spanish_date }}</div></div>
+    <div class="col-md-3"><div class="detail-label">Fecha incidencia</div><div class="detail-value">{{ incident.incident_date|spanish_date }}</div></div>
+    <div class="col-md-6"><div class="detail-label">Remitente</div><div class="detail-value">{{ incident.sender }}</div></div>
+    <div class="col-md-6"><div class="detail-label">Destinatario</div><div class="detail-value">{{ incident.recipient }}</div></div>
+    <div class="col-md-4"><div class="detail-label">Albarán</div><div class="detail-value">{{ incident.delivery_note_number|default:"-" }}</div></div>
+    <div class="col-md-4"><div class="detail-label">Cliente</div><div class="detail-value">{{ incident.customer_name|default:"-" }}</div></div>
+    <div class="col-md-4"><div class="detail-label">Representante</div><div class="detail-value">{{ incident.representative_code|default:"-" }} {{ incident.representative_name|default:"" }}</div></div>
+    <div class="col-12"><div class="detail-label">Descripción</div><div>{{ incident.description|linebreaksbr }}</div></div>
+  </div>
+</div>
+
+<div class="surface-card p-4 mb-4">
+  <h2 class="h4">Gestión del estado</h2>
+  <form method="post" class="row g-3">
+    {% csrf_token %}
+    {{ status_form.non_field_errors }}
+    <div class="col-md-4">
+      {{ status_form.status.label_tag }}
+      {{ status_form.status }}
+    </div>
+    <div class="col-12">
+      {{ status_form.resolution_notes.label_tag }}
+      {{ status_form.resolution_notes }}
+      {% for error in status_form.resolution_notes.errors %}
+        <div class="text-danger small mt-1">{{ error }}</div>
+      {% endfor %}
+    </div>
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">Guardar estado</button>
+    </div>
+  </form>
+</div>
+
+<div class="surface-card p-4 mb-4">
+  <div class="section-title mb-2">Resolución</div>
+  <h2 class="h4">Cómo se ha solucionado</h2>
+  <p class="mb-0">{{ incident.resolution_notes|default:"-"|linebreaksbr }}</p>
+</div>
+
+<div class="surface-card p-4 mb-4">
+  <div class="section-title mb-2">Auditoría</div>
+  <div class="row g-3">
+    <div class="col-md-4"><div class="detail-label">Creado por</div><div class="detail-value">{{ incident.created_by.email|default:incident.created_by.username }}</div></div>
+    <div class="col-md-4"><div class="detail-label">Cerrada el</div><div class="detail-value">{{ incident.closed_at|spanish_date|default:"-" }}</div></div>
+    <div class="col-md-4">
+      <div class="detail-label">Cerrada por</div>
+      <div class="detail-value">
+        {% if incident.closed_by %}{{ incident.closed_by.email|default:incident.closed_by.username }}{% else %}-{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="surface-card p-4">
+  <h2 class="h4">Adjuntos</h2>
+  {% if incident.attachments.all %}
+    <ul class="mb-0">
+      {% for attachment in incident.attachments.all %}
+        <li><a href="{{ attachment.file.url }}">{{ attachment.file.name }}</a></li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="mb-0 text-secondary">No hay adjuntos.</p>
+  {% endif %}
+</div>
+{% endblock %}

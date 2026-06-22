@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load date_format %}
+
+{% block title %}Nueva incidencia | Incidencias de transporte{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="surface-card p-4 mb-4">
+      <div class="module-kicker mb-3">Transporte</div>
+      <h1 class="h3">Incidencia de transporte</h1>
+      <p class="text-secondary mb-0">Puedes asociar un albarán o crear la incidencia directamente.</p>
+    </div>
+
+    <div class="surface-card p-4">
+      <h2 class="h5">Asociar albarán</h2>
+      {% if delivery_note %}
+        <div class="border rounded-3 bg-light p-3 mb-3">
+          <div class="row g-2">
+            <div class="col-6"><div class="detail-label">Albarán</div><div class="detail-value">{{ delivery_note.header.delivery_note_number }}</div></div>
+            <div class="col-6"><div class="detail-label">Fecha</div><div class="detail-value">{{ delivery_note.header.delivery_note_date|spanish_date }}</div></div>
+            <div class="col-12"><div class="detail-label">Cliente</div><div class="detail-value">{{ delivery_note.header.customer_name }}</div></div>
+            <div class="col-12"><div class="detail-label">Representante</div><div class="detail-value">{{ delivery_note.search_representative.code }} - {{ delivery_note.search_representative.name }}</div></div>
+          </div>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="clear_delivery_note">
+          <button type="submit" class="btn btn-outline-secondary">Quitar albarán</button>
+        </form>
+      {% else %}
+        <form method="post" class="row g-3">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="search_delivery_note">
+          {{ search_form.non_field_errors }}
+          {% if search_form.representative_code %}
+            <div class="col-12">
+              {{ search_form.representative_code.label_tag }}
+              {{ search_form.representative_code }}
+              {% for error in search_form.representative_code.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+          <div class="col-12">
+            {{ search_form.delivery_note_number.label_tag }}
+            {{ search_form.delivery_note_number }}
+            {% for error in search_form.delivery_note_number.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-outline-primary">Buscar albarán</button>
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="surface-card p-4">
+      <h2 class="h4">Datos de la incidencia</h2>
+      <form method="post" enctype="multipart/form-data" class="row g-3 mt-1">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="col-12 p-3 rounded-3 border bg-light">
+          {{ form.has_delivery_note.label_tag }}
+          <div>{{ form.has_delivery_note }}</div>
+          {% for error in form.has_delivery_note.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+        {% if form.representative_code %}
+          <div class="col-md-6">
+            {{ form.representative_code.label_tag }}
+            {{ form.representative_code }}
+            <div class="form-text">Obligatorio sin albarán para usuarios con alcance restringido.</div>
+            {% for error in form.representative_code.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="col-md-6">{{ form.carrier.label_tag }}{{ form.carrier }}</div>
+        <div class="col-md-6">{{ form.incident_type.label_tag }}{{ form.incident_type }}</div>
+        <div class="col-md-6">{{ form.shipment_direction.label_tag }}{{ form.shipment_direction }}</div>
+        <div class="col-md-6">{{ form.tracking_number.label_tag }}{{ form.tracking_number }}</div>
+        <div class="col-md-6">{{ form.internal_reference.label_tag }}{{ form.internal_reference }}</div>
+        <div class="col-md-4">{{ form.country.label_tag }}{{ form.country }}</div>
+        <div class="col-md-4">{{ form.province.label_tag }}{{ form.province }}</div>
+        <div class="col-md-4">{{ form.municipality.label_tag }}{{ form.municipality }}</div>
+        <div class="col-md-6">{{ form.sender.label_tag }}{{ form.sender }}</div>
+        <div class="col-md-6">{{ form.recipient.label_tag }}{{ form.recipient }}</div>
+        <div class="col-md-6">{{ form.shipping_date.label_tag }}{{ form.shipping_date }}</div>
+        <div class="col-md-6">{{ form.incident_date.label_tag }}{{ form.incident_date }}</div>
+        <div class="col-12">{{ form.description.label_tag }}{{ form.description }}</div>
+        <div class="col-12">{{ form.attachments.label_tag }}{{ form.attachments }}</div>
+        <div class="col-12 d-flex gap-2 flex-wrap">
+          <button type="submit" class="btn btn-primary">Crear incidencia</button>
+          <a class="btn btn-outline-secondary" href="{% url 'transport-incidents' %}">Volver al listado</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
